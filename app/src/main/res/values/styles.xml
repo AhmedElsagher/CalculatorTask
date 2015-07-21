@@ -1,0 +1,28 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="android:Theme.Holo.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="android:buttonStyle">@style/buttonStylen</item>
+        <item name="android:textViewStyle">@style/textStylen</item>
+
+
+    </style>
+
+    <style name="buttonStylen"
+         parent="@android:style/Widget.Button">
+        <!-- Customize your theme here. -->
+        <item name="android:background">@drawable/button_state_selector</item>
+        <item name="android:textColor">@drawable/text_color_selector</item>
+        <item name="android:textSize">20sp</item>
+    </style>
+    <style name="textStylen"
+        parent="@android:style/Widget.TextView">
+        <!-- Customize your theme here. -->
+
+        <item name="android:background">@drawable/text_view_shqpe</item>
+        <item name="android:textColor">#ffffff</item>
+        <item name="android:textSize">40sp</item>
+    </style>
+
+</resources>
