@@ -5,16 +5,14 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-
 import java.util.Stack;
 
 public class MainActivity extends Activity implements View.OnClickListener {
     private Stack<Double> numbers;
-    private Stack<Character> operators;
+    private Stack<Character> operations;
     private double firstNum;
     private double secondNum;
     private double resultNum;
-    private double ans = 0;
     private StringBuilder input = new StringBuilder();
     private Double stackNumInput;
     private Button number0;
@@ -39,10 +37,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        number0 = (Button) findViewById(R.id.zero);
+        number0 = (Button) findViewById(R.id.num0);
         number1 = (Button) findViewById(R.id.num1);
         number2 = (Button) findViewById(R.id.num2);
         number3 = (Button) findViewById(R.id.num3);
@@ -61,7 +59,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         clearButton = (Button) findViewById(R.id.clear);
         resultTV = (TextView) findViewById(R.id.textID);
         numbers = new Stack<Double>();
-        operators = new Stack<Character>();
+        operations = new Stack<Character>();
         number0.setOnClickListener(this);
         number1.setOnClickListener(this);
         number2.setOnClickListener(this);
@@ -81,17 +79,14 @@ public class MainActivity extends Activity implements View.OnClickListener {
         equalButton.setOnClickListener(this);
     }
 
-
+    //handle events
     @Override
     public void onClick(View v) {
 
         switch (v.getId()) {
-            case R.id.zero:
+            case R.id.num0:
                 resultTV.append("0");
-                if (input.length() != 0) {
-                    // what if u want to add 0+22
-                    input.append("0");
-                }
+                input.append("0");
                 break;
             case R.id.num1:
                 input.append("1");
@@ -130,71 +125,94 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 input.append("9");
                 break;
             case R.id.addOp:
-
-                stackNumInput = Double.parseDouble(input.toString());
-                numbers.push(stackNumInput);
-                input.delete(0, input.capacity());
-                if (operators.size() > 0 && (operators.peek().equals('*') || operators.peek().equals('/')))
+                try {
+                    checkForInput(input);
                     minmize();
-                //u can't put * & / over +
-                //meaning u cant execute them after + or minus
-                //u have to have number can't press any opeartor before pressing number
-                if (!numbers.empty()) {
-                    operators.push('+');
+                    operations.push('+');
                     resultTV.append("+");
 
+
+                } catch (DoubleOperationException e) {
+                    onClick(clearButton);
+                    resultTV.setText(e.getMessage());
+                } catch (NoOperatorException e) {
+                    onClick(clearButton);
+                    resultTV.setText(e.getMessage());
                 }
+
+
                 break;
             case R.id.subOp:
-                stackNumInput = Double.parseDouble(input.toString());
-                numbers.push(stackNumInput);
-                input.delete(0, input.capacity());
-                if (operators.size() > 0 && (operators.peek().equals('*') || operators.peek().equals('/')))
+                try {
+                    checkForInput(input);
                     minmize();
-                if (!numbers.empty()) {
-                    operators.push('-');
+                    operations.push('-');
                     resultTV.append("-");
+
+                } catch (DoubleOperationException e) {
+                    onClick(clearButton);
+                    resultTV.setText(e.getMessage());
+                } catch (NoOperatorException e) {
+                    onClick(clearButton);
+                    resultTV.setText(e.getMessage());
                 }
+
                 break;
             case R.id.mulOp:
-
-                stackNumInput = Double.parseDouble(input.toString());
-                numbers.push(stackNumInput);
-                input.delete(0, input.capacity());
-                if (operators.size() > 0 && (operators.peek().equals('*') || operators.peek().equals('/')))
+                try {
+                    checkForInput(input);
                     minmize();
-                if (!numbers.empty()) {
-                    operators.push('*');
+                    operations.push('*');
                     resultTV.append("*");
+
+                } catch (DoubleOperationException e) {
+                    onClick(clearButton);
+                    resultTV.setText(e.getMessage());
+                } catch (NoOperatorException e) {
+                    onClick(clearButton);
+                    resultTV.setText(e.getMessage());
                 }
+
                 break;
             case R.id.divOp:
-                stackNumInput = Double.parseDouble(input.toString());
-                numbers.push(stackNumInput);
-                input.delete(0, input.capacity());
-                if (operators.size() > 0 && (operators.peek().equals('*') || operators.peek().equals('/')))
+                try {
+                    checkForInput(input);
                     minmize();
-                if (!numbers.empty()) {
-                    operators.push('/');
+                    operations.push('/');
                     resultTV.append("/");
+
+                } catch (DoubleOperationException e) {
+                    onClick(clearButton);
+                    resultTV.setText(e.getMessage());
+                } catch (NoOperatorException e) {
+                    onClick(clearButton);
+                    resultTV.setText(e.getMessage());
                 }
+
                 break;
             case R.id.equal:
-                stackNumInput = Double.parseDouble(input.toString());
-                numbers.push(stackNumInput);
-                calculate();
-                resultTV.setText(String.valueOf(resultNum));
+                //handle click equal without having two operations and operation
+                if (numbers.size() > 0 && operations.size() > 0) {
+                    stackNumInput = Double.parseDouble(input.toString());
+                    numbers.push(stackNumInput);
+                    minmize();
+                    calculate();
+                    resultTV.setText(String.valueOf(resultNum));
+                } else
+                    resultTV.setText(String.valueOf("u have to enter operaters and operation"));
                 break;
             case R.id.erase:
+                //TODO:difficult process hndled badly try toexecute it better
                 String nowString = resultTV.getText().toString();
                 if (nowString.length() > 0) {
                     String x = String.valueOf((nowString.charAt(nowString.length() - 1)));
                     if (Character.isDigit(x.charAt(0)))
-                        //how to remove operators after numbers
+                        //how to remove operations after numbers
                         input.deleteCharAt(input.length() - 1);
-                    else {
+                    else if (operations.size() > 0 && numbers.size() > 0) {
                         //remove numbers after operator
-                        operators.pop();
+
+                        operations.pop();
                         input = new StringBuilder(String.valueOf(numbers.pop()));
                     }
                     String newText = resultTV.getText().toString().substring(0, resultTV.getText().toString().length() - 1);
@@ -205,7 +223,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 input.delete(0, input.capacity());
                 resultNum = 0;
                 numbers.clear();
-                operators.clear();
+                operations.clear();
                 resultTV.setText("");
                 break;
             case R.id.dot:
@@ -216,54 +234,70 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }
     }
 
-    private void minmize() {
-        secondNum = numbers.pop();
-        firstNum = numbers.pop();
-        switch (operators.pop()) {
-            case '*':
+    //check the input if it's two operations after another
+    //or u entered single operation without entering number before
+    private void checkForInput(StringBuilder input)
+            throws DoubleOperationException, NoOperatorException {
+        if (input.length() != 0) {
 
-                resultNum = firstNum * secondNum;
-                numbers.push(resultNum);
-                break;
-            case '/':
-                resultNum = firstNum / secondNum;
-                numbers.push(resultNum);
-                break;
+            stackNumInput = Double.parseDouble(input.toString());
+            numbers.push(stackNumInput);
+            input.delete(0, input.capacity());
+        } else {
+            if (numbers.size() > 0) {
+                throw new DoubleOperationException();
+            } else
+                throw new NoOperatorException();
 
+            //TODO:throw Exception of no operations
+            //TODO: throw exception here for 2 operators
         }
+
 
     }
 
-    private void calculate() {
-        while (!operators.empty() && numbers.size() > 1) {//make with the second + or - make the first cal
+    //elminate any *&&/ operation between +&- operation
+    private void minmize() {
+        if (operations.size() > 0 && (operations.peek().equals('*') || operations.peek().equals('/'))) {
             secondNum = numbers.pop();
             firstNum = numbers.pop();
-            switch (operators.pop()) {
-
-                case '+':
-                    if (operators.size() > 0 && operators.peek().equals('-'))
-                        resultNum = -(-firstNum + secondNum);
-                    else
-                        resultNum = firstNum + secondNum;
-                    numbers.push(resultNum);
-                    break;
-                case '-':
-                    if (operators.size() > 0 && operators.peek().equals('-'))
-                        resultNum = (firstNum + secondNum);
-                    else
-                        resultNum = firstNum - secondNum;
-                    numbers.push(resultNum);
-                    break;
+            switch (operations.pop()) {
                 case '*':
 
                     resultNum = firstNum * secondNum;
-                    numbers.push(resultNum);
                     break;
                 case '/':
                     resultNum = firstNum / secondNum;
-                    numbers.push(resultNum);
                     break;
+
             }
+            numbers.push(resultNum);
+        }
+    }
+
+    //calculate any +|- operation
+    private void calculate() {
+        while (!operations.empty() && numbers.size() > 1) {
+            secondNum = numbers.pop();
+            firstNum = numbers.pop();
+            switch (operations.pop()) {
+
+                case '+':
+                    if (operations.size() > 0 && operations.peek().equals('-'))
+                        resultNum = -(-firstNum + secondNum);
+                    else
+                        resultNum = firstNum + secondNum;
+                    break;
+                case '-':
+                    if (operations.size() > 0 && operations.peek().equals('-'))
+                        resultNum = (firstNum + secondNum);
+                    else
+                        resultNum = firstNum - secondNum;
+
+                    break;
+
+            }
+            numbers.push(resultNum);
         }
     }
 }
